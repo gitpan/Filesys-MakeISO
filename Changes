@@ -1,0 +1,4 @@
+Revision history for Filesys::MakeISO
+
+0.0.1  2006-01-08
+    - Initial release. Only supports mkisofs.
