@@ -1,11 +1,6 @@
-Filesys::MakeISO version 0.0.1
+Filesys::MakeISO version 0.1.0
 
 A (portable) way to create ISO images.
-
-
-TODO
-
-Driver/subclasses for other programms.
 
 
 INSTALLATION
@@ -20,7 +15,7 @@ To install this module, run the following commands:
 
 DEPENDENCIES
 
-None.
+Module::Pluggable
 
 
 COPYRIGHT AND LICENSE

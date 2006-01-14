@@ -1,5 +1,5 @@
 package Filesys::MakeISO;
-use version; $VERSION = qv('0.0.1');
+use version; $VERSION = qv('0.1.0');
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Filesys::MakeISO - make iso images (portable)
 
 =head1 VERSION
 
-This document describes Filesys::MakeISO version 0.0.1
+This document describes Filesys::MakeISO version 0.1.0
 
 =head1 SYNOPSIS
 
@@ -25,15 +25,23 @@ use strict;
 use warnings;
 
 use Carp ();
+use Module::Pluggable
+    sub_name    => 'drivers',
+    search_path => [qw(Filesys::MakeISO::Driver)];
 
 #=head1 DESCRIPTION
 
 =head1 INTERFACE
 
+=head2 drivers
+
+Returns a list of available driver classes. This method is provied by
+L<Module::Pluggable>.
+
 =head2 new [PARAMS]
 
-Create a new L<Filesys::MakeISO> object if a suitable subclass is found.
-If not C<undef> is returned.
+Create a new L<Filesys::MakeISO> object if a suitable driver class is
+found. If not C<undef> is returned.
 
 Valid PARAMS are:
 
@@ -41,30 +49,35 @@ Valid PARAMS are:
 
 =item class
 
-Use (only) this subclass.
+Use (only) this driver class.
 
 =back
+
+Additional parameters are passed to the driver classes, for example to
+specify the binary location. Look in the C<Filesys::MakeISO::Driver>
+namespace for driver classes.
 
 =cut
 
 sub new {
     my ($class, %arg) = @_;
 
-    # which subclasses to try?
-    my @try = ();
+    # which driver classes to try?
+    my @driver = ();
     if ($arg{class}) {
-        @try = ($arg{class});
+        @driver = ($arg{class});
+        delete $arg{class};
     }
     else {
-        @try = qw(Filesys::MakeISO::Mkisofs);
+        @driver = $class->drivers;
     }
 
     my $self = undef;
-    foreach my $subclass (@try) {
-        eval "require $subclass";
+    foreach my $class (@driver) {
+        eval "require $class";
         next if $@;
-        $self = $subclass->new(%arg);
-        next unless $self;
+        $self = $class->new(%arg);
+        last if $self;
     }
 
     return $self;
@@ -176,7 +189,10 @@ Filesys::MakeISO requires no configuration files or environment variables.
 
 =head1 DEPENDENCIES
 
-None.
+L<Module::Pluggable>
+
+You need a driver class (and the matching tool) installed. See the
+C<Filesys::MakeISO::Driver> namespace for drivers.
 
 =head1 INCOMPATIBILITIES
 
